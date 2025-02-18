@@ -339,8 +339,8 @@ public class RustUtil
         }
     }
 
-      /**
-     * Separator symbols for `std::fmt::Display` implementations on codecs.
+    /**
+     * Separator symbols for `HumanReadable` implementations on codecs.
      */
     enum Separator
     {
@@ -414,7 +414,7 @@ public class RustUtil
         }
     }
 
-        /**
+    /**
      * Checks if the given encoding represents an ASCII charset.
      *
      * @param encoding as a string name (e.g. ASCII).
