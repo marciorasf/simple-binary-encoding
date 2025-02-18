@@ -61,8 +61,7 @@ public class RustGenerator implements CodeGenerator
     {
         Decoder
         {
-            @Override
-			String bufType()
+            String bufType()
             {
                 return READ_BUF_TYPE;
             }
@@ -70,8 +69,7 @@ public class RustGenerator implements CodeGenerator
 
         Encoder
         {
-            @Override
-			String bufType()
+            String bufType()
             {
                 return WRITE_BUF_TYPE;
             }
@@ -1171,11 +1169,6 @@ public class RustGenerator implements CodeGenerator
         final PrimitiveType primitiveType = encoding.primitiveType();
         final String rustPrimitiveType = rustTypeName(primitiveType);
         final String characterEncoding = encoding.characterEncoding();
-
-        // System.out.println("name: " + name);
-        // System.out.println("fieldToken: " + fieldToken.name());
-        // System.out.println("primitiveType: " + primitiveType);
-        // System.out.println("rustPrimitiveType: " + rustPrimitiveType);
 
         indent(sb, level, "/// primitive field - '%s'\n", encoding.presence());
 
