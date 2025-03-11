@@ -1500,17 +1500,17 @@ public class RustGenerator implements CodeGenerator
         indent(writer, 1, "}\n");
         indent(writer, 0, "}\n");
 
-        appendImplHumanReadableForBitSet(bitSetType, tokens, writer, 0);
+        appendImplSbeToStringForBitSet(bitSetType, tokens, writer, 0);
     }
 
-    static void appendImplHumanReadableForBitSet(
+    static void appendImplSbeToStringForBitSet(
         final String bitSetType,
         final List<Token> tokens,
         final Appendable writer,
         final int level) throws IOException
     {
-        indent(writer, level, "impl HumanReadable for %s {\n", bitSetType);
-        indent(writer, level + 1, "fn human_readable(mut self) -> SbeResult<(Self, String)> {\n");
+        indent(writer, level, "impl SbeToString for %s {\n", bitSetType);
+        indent(writer, level + 1, "fn sbe_to_string(mut self) -> SbeResult<(Self, String)> {\n");
         indent(writer, level + 2, "let mut str = String::new();\n");
 
         for (final Token token : tokens)
@@ -2056,18 +2056,18 @@ public class RustGenerator implements CodeGenerator
 
         indent(out, 1, "}\n"); // end impl
 
-        appendImplHumanReadableForComposite(out, decoderName, tokens, 1);
+        appendImplSbeToStringForComposite(out, decoderName, tokens, 1);
 
         indent(out, 0, "} // end decoder mod \n");
     }
 
-    private static void appendImplHumanReadableForComposite(
+    private static void appendImplSbeToStringForComposite(
         final Appendable writer,
         final String decoderName,
         final List<Token> tokens,
         final int level) throws IOException {
-            indent(writer, level, "impl<'a, P> HumanReadable for %s<P> where P: Reader<'a> + ActingVersion + Default +'a {\n", decoderName);
-            indent(writer, level + 1, "fn human_readable(mut self) -> SbeResult<(Self, String)> {\n");
+            indent(writer, level, "impl<'a, P> SbeToString for %s<P> where P: Reader<'a> + ActingVersion + Default +'a {\n", decoderName);
+            indent(writer, level + 1, "fn sbe_to_string(mut self) -> SbeResult<(Self, String)> {\n");
 
             indent(writer, level + 2, "let mut str = String::new();\n");
 
@@ -2075,7 +2075,7 @@ public class RustGenerator implements CodeGenerator
             for (int i = 1, size = tokens.size() - 1; i < size; ) {
                 final Token token = tokens.get(i);
                 final String fieldName = RustUtil.formatPropertyName(token.name());
-                writeHumanReadableKeyValue(fieldName, token, writer, level + 2);
+                writeSbeToStringKeyValue(fieldName, token, writer, level + 2);
                 i += token.componentTokenCount();
             }
 
@@ -2099,7 +2099,7 @@ public class RustGenerator implements CodeGenerator
         indent(writer, level, "}\n\n");
     }
 
-    static void appendImplHumanReadableForDecoder(
+    static void appendImplSbeToStringForDecoder(
         final Appendable writer,
         final String decoderName,
         final String msgName,
@@ -2108,11 +2108,11 @@ public class RustGenerator implements CodeGenerator
         final List<Token> varData,
         final int level) throws IOException{
             if (msgName != null){
-                indent(writer, level, "impl<'a> HumanReadable for %s<'a> {\n", decoderName);
+                indent(writer, level, "impl<'a> SbeToString for %s<'a> {\n", decoderName);
             } else {
-                indent(writer, level, "impl<'a, P> HumanReadable for %s<P> where P: Decoder<'a> + ActingVersion + Default +'a {\n", decoderName);
+                indent(writer, level, "impl<'a, P> SbeToString for %s<P> where P: Decoder<'a> + ActingVersion + Default +'a {\n", decoderName);
             }
-            indent(writer, level + 1, "fn human_readable(mut self) -> SbeResult<(Self, String)> {\n");
+            indent(writer, level + 1, "fn sbe_to_string(mut self) -> SbeResult<(Self, String)> {\n");
 
 
             indent(writer, level + 2, "let mut str = String::new();\n");
@@ -2156,7 +2156,7 @@ public class RustGenerator implements CodeGenerator
                 {
                     final Token encodingToken = fields.get(i + 1);
                     final String fieldName = RustUtil.formatPropertyName(fieldToken.name());
-                    writeHumanReadableKeyValue(fieldName, encodingToken, writer, level + 2);
+                    writeSbeToStringKeyValue(fieldName, encodingToken, writer, level + 2);
 
                     i += fieldToken.componentTokenCount();
                 }
@@ -2185,7 +2185,7 @@ public class RustGenerator implements CodeGenerator
                 indent(writer, level + 2, "str.push('%s');\n", Separator.BEGIN_GROUP);
 
                 indent(writer, level + 2, "while %s.advance()?.is_some() {\n", groupName);
-                indent(writer, level + 3, "let result = %s.human_readable()?;\n", groupName);
+                indent(writer, level + 3, "let result = %s.sbe_to_string()?;\n", groupName);
                 indent(writer, level + 3, "%s = result.0;\n", groupName);
                 indent(writer, level + 3, "str.push_str(&result.1);\n");
                 indent(writer, level + 3, "str.push('%s');\n", Separator.ENTRY);
@@ -2259,7 +2259,7 @@ public class RustGenerator implements CodeGenerator
             indent(writer, level, "}\n");
         }
 
-        private static void writeHumanReadableKeyValue(
+        private static void writeSbeToStringKeyValue(
             final String fieldName, final Token typeToken, final Appendable writer, final int level)
         throws IOException{
             if (typeToken.encodedLength() <= 0 || typeToken.isConstantEncoding())
@@ -2317,14 +2317,14 @@ public class RustGenerator implements CodeGenerator
                         indent(writer, level + 2, "self = self_;\n");
                         indent(writer, level + 1, "},\n");
                         indent(writer, level + 1, "Either::Right(mut %s) => {\n", formattedFieldName);
-                        indent(writer, level + 2, "let (mut %s, string) = %s.human_readable()?;\n", formattedFieldName, formattedFieldName);
+                        indent(writer, level + 2, "let (mut %s, string) = %s.sbe_to_string()?;\n", formattedFieldName, formattedFieldName);
                         indent(writer, level + 2, "str.push_str(&string);\n");
                         indent(writer, level + 2, "self = %s.parent()?;\n", formattedFieldName);
                         indent(writer, level + 1, "}\n");
                         indent(writer, level, "}\n");
                     } else {
                         indent(writer, level, "let mut %s = self.%s_decoder();\n", formattedFieldName, formattedFieldName);
-                        indent(writer, level, "let (mut %s, string) = %s.human_readable()?;\n", formattedFieldName, formattedFieldName);
+                        indent(writer, level, "let (mut %s, string) = %s.sbe_to_string()?;\n", formattedFieldName, formattedFieldName);
                         indent(writer, level, "str.push_str(&string);\n");
                         indent(writer, level, "self = %s.parent()?;\n", formattedFieldName);
                     } 
@@ -2334,7 +2334,7 @@ public class RustGenerator implements CodeGenerator
 
                 case BEGIN_SET:
                     indent(writer, level, "str.push('%s');\n", Separator.BEGIN_SET);
-                    indent(writer, level, "str.push_str(&self.%s().human_readable()?.1);\n", formattedFieldName);
+                    indent(writer, level, "str.push_str(&self.%s().sbe_to_string()?.1);\n", formattedFieldName);
                     indent(writer, level, "str.push('%s');\n", Separator.END_SET);
                     break;
     
